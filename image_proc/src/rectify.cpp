@@ -57,30 +57,16 @@ RectifyNode::RectifyNode(const rclcpp::NodeOptions & options)
 void RectifyNode::subscribeToCamera()
 {
   std::lock_guard<std::mutex> lock(connect_mutex_);
-
-  /*
-  *  SubscriberStatusCallback not yet implemented
-  *
-  if (pub_rect_.getNumSubscribers() == 0)
-    sub_camera_.shutdown();
-  else if (!sub_camera_)
-  {
-  */
   sub_camera_ = image_transport::create_camera_subscription(
     this, "image", std::bind(
       &RectifyNode::imageCb,
-      this, std::placeholders::_1, std::placeholders::_2), "raw");
-  // }
+      this, std::placeholders::_1, std::placeholders::_2), "raw", rmw_qos_profile_sensor_data);
 }
 
 void RectifyNode::imageCb(
   const sensor_msgs::msg::Image::ConstSharedPtr & image_msg,
   const sensor_msgs::msg::CameraInfo::ConstSharedPtr & info_msg)
 {
-  if (pub_rect_.getNumSubscribers() < 1) {
-    return;
-  }
-
   // Verify camera is actually calibrated
   if (info_msg->k[0] == 0.0) {
     RCLCPP_ERROR(

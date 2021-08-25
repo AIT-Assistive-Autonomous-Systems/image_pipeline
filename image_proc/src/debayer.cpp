@@ -56,10 +56,10 @@ DebayerNode::DebayerNode(const rclcpp::NodeOptions & options)
     this, "image_raw",
     std::bind(
       &DebayerNode::imageCb, this,
-      std::placeholders::_1), "raw");
+      std::placeholders::_1), "raw", rmw_qos_profile_sensor_data);
 
-  pub_mono_ = image_transport::create_publisher(this, "image_mono");
-  pub_color_ = image_transport::create_publisher(this, "image_color");
+  pub_mono_ = image_transport::create_publisher(this, "image_mono", rmw_qos_profile_sensor_data);
+  pub_color_ = image_transport::create_publisher(this, "image_color", rmw_qos_profile_sensor_data);
   debayer_ = this->declare_parameter("debayer", 3);
 }
 
@@ -99,11 +99,6 @@ void DebayerNode::imageCb(const sensor_msgs::msg::Image::ConstSharedPtr & raw_ms
         }
       }
     }
-  }
-
-  // Next, publish to color
-  if (!pub_color_.getNumSubscribers()) {
-    return;
   }
 
   if (enc::isMono(raw_msg->encoding)) {
