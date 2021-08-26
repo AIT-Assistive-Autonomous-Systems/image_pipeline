@@ -82,6 +82,17 @@ void convertDepth(
   }
 }
 
+template void convertDepth<uint16_t>(
+  const sensor_msgs::msg::Image::ConstSharedPtr & depth_msg,
+  sensor_msgs::msg::PointCloud2::SharedPtr & cloud_msg,
+  const image_geometry::PinholeCameraModel & model,
+  double range_max);
+template void convertDepth<float>(
+  const sensor_msgs::msg::Image::ConstSharedPtr & depth_msg,
+  sensor_msgs::msg::PointCloud2::SharedPtr & cloud_msg,
+  const image_geometry::PinholeCameraModel & model,
+  double range_max);
+
 // Handles float or uint16 depths
 template<typename T>
 void convertDepthRadial(
