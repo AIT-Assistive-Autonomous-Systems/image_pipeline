@@ -57,7 +57,7 @@ ResizeNode::ResizeNode(const rclcpp::NodeOptions & options)
     std::bind(
       &ResizeNode::imageCb, this,
       std::placeholders::_1,
-      std::placeholders::_2), "raw");
+      std::placeholders::_2), "raw", rmw_qos_profile_sensor_data);
 
   interpolation_ = this->declare_parameter("interpolation", 1);
   use_scale_ = this->declare_parameter("use_scale", true);

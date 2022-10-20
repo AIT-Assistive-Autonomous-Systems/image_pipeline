@@ -127,7 +127,7 @@ CropDecimateNode::CropDecimateNode(const rclcpp::NodeOptions & options)
   sub_ = image_transport::create_camera_subscription(
     this, "in/image_raw", std::bind(
       &CropDecimateNode::imageCb, this,
-      std::placeholders::_1, std::placeholders::_2), "raw");
+      std::placeholders::_1, std::placeholders::_2), "raw", rmw_qos_profile_sensor_data);
 }
 
 void CropDecimateNode::imageCb(
@@ -136,9 +136,9 @@ void CropDecimateNode::imageCb(
 {
   /// @todo Check image dimensions match info_msg
 
-  if (pub_.getNumSubscribers() < 1) {
-    return;
-  }
+  // if (pub_.getNumSubscribers() < 1) {
+  //   return;
+  // }
 
   int decimation_x = decimation_x_;
   int decimation_y = decimation_y_;

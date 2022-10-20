@@ -56,7 +56,7 @@ CropNonZeroNode::CropNonZeroNode(const rclcpp::NodeOptions & options)
     this, "image_raw",
     std::bind(
       &CropNonZeroNode::imageCb,
-      this, std::placeholders::_1), "raw");
+      this, std::placeholders::_1), "raw", rmw_qos_profile_sensor_data);
 }
 
 void CropNonZeroNode::imageCb(const sensor_msgs::msg::Image::ConstSharedPtr & raw_msg)
