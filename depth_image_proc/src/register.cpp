@@ -145,9 +145,9 @@ void RegisterNode::connectCb()
     sub_rgb_info_.unsubscribe();
   } else if (!sub_depth_image_.getSubscriber()) {
     image_transport::TransportHints hints(this, "raw");
-    sub_depth_image_.subscribe(this, "depth/image_rect", hints.getTransport());
-    sub_depth_info_.subscribe(this, "depth/camera_info");
-    sub_rgb_info_.subscribe(this, "rgb/camera_info");
+    sub_depth_image_.subscribe(this, "depth/image_rect", hints.getTransport(), rmw_qos_profile_sensor_data);
+    sub_depth_info_.subscribe(this, "depth/camera_info", rmw_qos_profile_sensor_data);
+    sub_rgb_info_.subscribe(this, "rgb/camera_info", rmw_qos_profile_sensor_data);
   }
 }
 
