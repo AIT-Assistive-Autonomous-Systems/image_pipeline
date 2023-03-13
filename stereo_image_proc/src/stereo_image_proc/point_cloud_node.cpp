@@ -48,7 +48,7 @@
 #include <sensor_msgs/image_encodings.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <sensor_msgs/point_cloud2_iterator.hpp>
-#include <stereo_msgs/msg/disparity_image.hpp>
+#include <sensor_msgs/msg/image.hpp>
 
 namespace stereo_image_proc
 {
@@ -62,17 +62,17 @@ private:
   // Subscriptions
   image_transport::SubscriberFilter sub_l_image_;
   message_filters::Subscriber<sensor_msgs::msg::CameraInfo> sub_l_info_, sub_r_info_;
-  message_filters::Subscriber<stereo_msgs::msg::DisparityImage> sub_disparity_;
+  message_filters::Subscriber<sensor_msgs::msg::Image> sub_disparity_;
   using ExactPolicy = message_filters::sync_policies::ExactTime<
     sensor_msgs::msg::Image,
     sensor_msgs::msg::CameraInfo,
     sensor_msgs::msg::CameraInfo,
-    stereo_msgs::msg::DisparityImage>;
+    sensor_msgs::msg::Image>;
   using ApproximatePolicy = message_filters::sync_policies::ApproximateTime<
     sensor_msgs::msg::Image,
     sensor_msgs::msg::CameraInfo,
     sensor_msgs::msg::CameraInfo,
-    stereo_msgs::msg::DisparityImage>;
+    sensor_msgs::msg::Image>;
   using ExactSync = message_filters::Synchronizer<ExactPolicy>;
   using ApproximateSync = message_filters::Synchronizer<ApproximatePolicy>;
   std::shared_ptr<ExactSync> exact_sync_;
@@ -91,7 +91,7 @@ private:
     const sensor_msgs::msg::Image::ConstSharedPtr & l_image_msg,
     const sensor_msgs::msg::CameraInfo::ConstSharedPtr & l_info_msg,
     const sensor_msgs::msg::CameraInfo::ConstSharedPtr & r_info_msg,
-    const stereo_msgs::msg::DisparityImage::ConstSharedPtr & disp_msg);
+    const sensor_msgs::msg::Image::ConstSharedPtr & disp_msg);
 };
 
 PointCloudNode::PointCloudNode(const rclcpp::NodeOptions & options)
@@ -173,7 +173,7 @@ void PointCloudNode::imageCb(
   const sensor_msgs::msg::Image::ConstSharedPtr & l_image_msg,
   const sensor_msgs::msg::CameraInfo::ConstSharedPtr & l_info_msg,
   const sensor_msgs::msg::CameraInfo::ConstSharedPtr & r_info_msg,
-  const stereo_msgs::msg::DisparityImage::ConstSharedPtr & disp_msg)
+  const sensor_msgs::msg::Image::ConstSharedPtr & dimage)
 {
   // If there are no subscriptions for the point cloud, do nothing
   if (pub_points2_->get_subscription_count() == 0u) {
@@ -183,20 +183,18 @@ void PointCloudNode::imageCb(
   // Update the camera model
   model_.fromCameraInfo(l_info_msg, r_info_msg);
 
-  // Calculate point cloud
-  const sensor_msgs::msg::Image & dimage = disp_msg->image;
   // The cv::Mat_ constructor doesn't accept a const data data pointer
   // so we remove the constness before reinterpreting into float.
   // This is "safe" since our cv::Mat is const.
-  float * data = reinterpret_cast<float *>(const_cast<uint8_t *>(&dimage.data[0]));
+  float * data = reinterpret_cast<float *>(const_cast<uint8_t *>(&dimage->data[0]));
 
-  const cv::Mat_<float> dmat(dimage.height, dimage.width, data, dimage.step);
+  const cv::Mat_<float> dmat(dimage->height, dimage->width, data, dimage->step);
   model_.projectDisparityImageTo3d(dmat, points_mat_, true);
   cv::Mat_<cv::Vec3f> mat = points_mat_;
 
   // Fill in new PointCloud2 message (2D image-like layout)
   auto points_msg = std::make_shared<sensor_msgs::msg::PointCloud2>();
-  points_msg->header = disp_msg->header;
+  points_msg->header = dimage->header;
   points_msg->height = mat.rows;
   points_msg->width = mat.cols;
   points_msg->is_bigendian = false;
