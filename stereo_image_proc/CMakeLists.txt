@@ -21,6 +21,7 @@ ament_auto_add_library(${PROJECT_NAME} SHARED
   src/${PROJECT_NAME}/stereo_processor.cpp
   src/${PROJECT_NAME}/disparity_node.cpp
   src/${PROJECT_NAME}/point_cloud_node.cpp
+  src/${PROJECT_NAME}/resize_disparity_node.cpp
 )
 target_link_libraries(${PROJECT_NAME}
   ${OpenCV_LIBRARIES}
@@ -29,6 +30,10 @@ target_link_libraries(${PROJECT_NAME}
 rclcpp_components_register_node(${PROJECT_NAME}
   PLUGIN "stereo_image_proc::DisparityNode"
   EXECUTABLE disparity_node
+)
+rclcpp_components_register_node(${PROJECT_NAME}
+  PLUGIN "stereo_image_proc::ResizeDisparityNode"
+  EXECUTABLE resize_disparity_node
 )
 rclcpp_components_register_node(${PROJECT_NAME}
   PLUGIN "stereo_image_proc::PointCloudNode"
