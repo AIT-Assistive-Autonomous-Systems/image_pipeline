@@ -300,6 +300,19 @@ void PointCloudNode::imageCb(
           *iter_b = bgr[0];
         }
       }
+    } else if (encoding == enc::BGRA8) {
+      const cv::Mat_<cv::Vec4b> color(
+        l_image_msg->height, l_image_msg->width,
+        (cv::Vec4b *)(&l_image_msg->data[0]),
+        l_image_msg->step);
+      for (int v = 0; v < mat.rows; ++v) {
+        for (int u = 0; u < mat.cols; ++u, ++iter_r, ++iter_g, ++iter_b) {
+          const cv::Vec4b & bgr = color(v, u);
+          *iter_r = bgr[2];
+          *iter_g = bgr[1];
+          *iter_b = bgr[0];
+        }
+      }
     } else {
       // Throttle duration in milliseconds
       RCUTILS_LOG_WARN_THROTTLE(
